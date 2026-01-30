@@ -2,15 +2,17 @@
   import { getContext } from "svelte"
 
   export let mappingJson = ""
+  export let tableId = ""
   export let onImport // settingsで定義したイベントはプロパティとして関数が渡されます
 
-  const { styleable } = getContext("sdk")
+  const { styleable, API } = getContext("sdk")
   const component = getContext("component")
 
   let isDragging = false
   let jsonResult = ""
   let useShiftJIS = false
   let validationWarning = ""
+  let isChecking = false
 
   // ヘッダー変換用マッピング定義
   let headerMapping = {}
@@ -62,10 +64,15 @@
       // CSVファイルかどうかの簡易チェック
       if (file.type === "text/csv" || file.name.endsWith(".csv")) {
         const reader = new FileReader()
-        reader.onload = (event) => {
+        reader.onload = async (event) => {
           const text = event.target.result
           try {
-            const data = parseCsv(text)
+            isChecking = true
+            let data = parseCsv(text)
+            
+            // 重複チェック実行
+            data = await checkDuplicates(data)
+
             const validatedData = validateData(data)
             jsonResult = JSON.stringify(validatedData, null, 2)
 
@@ -77,6 +84,8 @@
             alert(e.message)
             jsonResult = ""
             validationWarning = ""
+          } finally {
+            isChecking = false
           }
         }
         reader.readAsText(file, useShiftJIS ? "Shift-JIS" : "UTF-8")
@@ -111,6 +120,34 @@
       return obj
     }).filter(Boolean)
     return result
+  }
+
+  // データベースとの重複チェック (API.searchTableを使用)
+  const checkDuplicates = async (data) => {
+    if (!tableId || !API) return data
+
+    // 各行についてデータベースを検索
+    const checkedData = await Promise.all(data.map(async (row) => {
+      if (row.serial_number) {
+        try {
+          const response = await API.searchTable(tableId, {
+            query: {
+              equal: { "serial_number": row.serial_number }
+            },
+            limit: 1
+          })
+          // searchTableの戻り値から行データを確認 (通常は response.rows に配列が入る)
+          const rows = response.rows || []
+          if (rows.length > 0) {
+            row._is_duplicate = true
+          }
+        } catch (e) {
+          console.error("Duplicate check failed for row:", row, e)
+        }
+      }
+      return row
+    }))
+    return checkedData
   }
 
   // バリデーション処理と結果の保存
@@ -149,6 +186,10 @@
             errors.push("transfer_execution_date: service_and_billing_start_dateの2ヶ月以降である必要があります")
           }
         }
+      }
+
+      if (row._is_duplicate) {
+        errors.push("serial_number: 既に登録されています")
       }
 
       row.validation_result = errors.length > 0 ? errors.join(", ") : "OK"
@@ -219,7 +260,11 @@
       align-items: center;
     "
   >
-    {#if jsonResult}
+    {#if isChecking}
+      <p style="color: #666; margin: 0;">
+        データをチェック中...
+      </p>
+    {:else if jsonResult}
       {#if validationWarning}
         <div style="width: 100%; text-align: left; background: #fffbe6; border: 1px solid #ffe58f; padding: 10px; border-radius: 4px; margin-bottom: 10px; color: #faad14;">
           ⚠️ {validationWarning}

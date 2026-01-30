@@ -17,6 +17,12 @@
         "description": "CSVヘッダーをJSONキーに変換するマッピング定義 (JSON形式)"
       },
       {
+        "type": "text",
+        "key": "tableId",
+        "label": "Target Table ID",
+        "description": "重複チェックを行う対象のテーブルID (例: ta_...)"
+      },
+      {
         "type": "event",
         "key": "onImport",
         "label": "On Import",
