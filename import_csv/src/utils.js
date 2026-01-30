@@ -98,24 +98,34 @@ export const checkDuplicates = async (data, tableId, API) => {
 }
 
 // バリデーション処理
-export const validateData = (data) => {
+export const validateData = (data, labelMap = {}) => {
   const now = new Date()
   const threeMonthsAgo = new Date()
   threeMonthsAgo.setMonth(now.getMonth() - 3)
   
   const dateFields = ["application_date", "service_and_billing_start_date", "transfer_application_deadline"]
+  const getLabel = (key) => labelMap[key] || key
+
+  // ファイル内でのserial_number重複カウント
+  const serialCounts = {}
+  data.forEach(row => {
+    if (row.serial_number) {
+      serialCounts[row.serial_number] = (serialCounts[row.serial_number] || 0) + 1
+    }
+  })
 
   return data.map(row => {
     const errors = []
     dateFields.forEach(field => {
       if (row[field]) {
         const d = new Date(row[field])
+        const label = getLabel(field)
         if (isNaN(d.getTime())) {
-          errors.push(`${field}: 日付形式不正`)
+          errors.push(`${label}: 日付不正`)
         } else if (d < threeMonthsAgo) {
-          errors.push(`${field}: 3ヶ月より前`)
+          errors.push(`${label}: 3ヶ月以前`)
         } else if (d > now) {
-          errors.push(`${field}: 未来の日付`)
+          errors.push(`${label}: 未来日付`)
         }
       }
     })
@@ -129,13 +139,19 @@ export const validateData = (data) => {
         minTransferDate.setMonth(minTransferDate.getMonth() + 2)
 
         if (transferDate < minTransferDate) {
-          errors.push("transfer_execution_date: service_and_billing_start_dateの2ヶ月以降である必要があります")
+          const labelTransfer = getLabel("transfer_execution_date")
+          const labelService = getLabel("service_and_billing_start_date")
+          errors.push(`${labelTransfer}: ${labelService}の2ヶ月後以降`)
         }
       }
     }
 
+    if (row.serial_number && serialCounts[row.serial_number] > 1) {
+      errors.push(`${getLabel("serial_number")}: ファイル内で重複`)
+    }
+
     if (row._is_duplicate) {
-      errors.push("serial_number: 既に登録されています")
+      errors.push(`${getLabel("serial_number")}: 登録済`)
     }
 
     row.validation_result = errors.length > 0 ? errors.join(", ") : "OK"

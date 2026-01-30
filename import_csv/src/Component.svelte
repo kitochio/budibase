@@ -56,8 +56,24 @@
             // 重複チェック実行
             data = await checkDuplicates(data, tableId, API)
 
-            const validatedData = validateData(data)
-            jsonResult = JSON.stringify(validatedData, null, 2)
+            // 表示用にキーを元のヘッダー名に戻すためのマッピングを作成
+            const reverseMapping = Object.entries(headerMapping).reduce((acc, [key, value]) => {
+              acc[value] = key
+              return acc
+            }, {})
+
+            const validatedData = validateData(data, reverseMapping)
+
+            const displayData = validatedData.map(row => {
+              const newRow = {}
+              Object.keys(row).forEach(key => {
+                const originalKey = reverseMapping[key] || key
+                newRow[originalKey] = row[key]
+              })
+              return newRow
+            })
+
+            jsonResult = JSON.stringify(displayData, null, 2)
 
             const errorCount = validatedData.filter(row => row.validation_result && row.validation_result !== "OK").length
             if (errorCount > 0) {
