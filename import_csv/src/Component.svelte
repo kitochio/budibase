@@ -10,6 +10,7 @@
   let isDragging = false
   let jsonResult = ""
   let useShiftJIS = false
+  let validationWarning = ""
 
   // ヘッダー変換用マッピング定義
   let headerMapping = {}
@@ -63,7 +64,20 @@
         const reader = new FileReader()
         reader.onload = (event) => {
           const text = event.target.result
-          jsonResult = csvToJson(text)
+          try {
+            const data = parseCsv(text)
+            const validatedData = validateData(data)
+            jsonResult = JSON.stringify(validatedData, null, 2)
+
+            const errorCount = validatedData.filter(row => row.validation_result && row.validation_result !== "OK").length
+            if (errorCount > 0) {
+              validationWarning = `${errorCount}件のデータにバリデーション警告があります。JSONデータ内の "validation_result" を確認してください。`
+            }
+          } catch (e) {
+            alert(e.message)
+            jsonResult = ""
+            validationWarning = ""
+          }
         }
         reader.readAsText(file, useShiftJIS ? "Shift-JIS" : "UTF-8")
       } else {
@@ -73,13 +87,17 @@
   }
 
   // 簡易的なCSVパーサー
-  const csvToJson = (csv) => {
+  const parseCsv = (csv) => {
     const lines = csv.trim().split(/\r?\n/)
-    if (lines.length < 2) return "[]"
+    if (lines.length < 2) return []
 
     // 1行目を読み込み、マッピング定義に従ってキーを変換する
     const rawHeaders = parseCSVLine(lines[0])
     const headers = rawHeaders.map(header => headerMapping[header] || null)
+
+    if (headers.every(h => !h)) {
+      throw new Error("有効なヘッダーが見つかりませんでした。CSVのヘッダー名、または「日本語Excel (Shift-JIS) として読み込む」のチェックボックスを確認してください。")
+    }
 
     const result = lines.slice(1).map((line) => {
       if (!line.trim()) return null
@@ -92,7 +110,50 @@
       })
       return obj
     }).filter(Boolean)
-    return JSON.stringify(result, null, 2)
+    return result
+  }
+
+  // バリデーション処理と結果の保存
+  const validateData = (data) => {
+    const now = new Date()
+    const threeMonthsAgo = new Date()
+    threeMonthsAgo.setMonth(now.getMonth() - 3)
+    
+    const dateFields = ["application_date", "service_and_billing_start_date", "transfer_application_deadline"]
+
+    return data.map(row => {
+      const errors = []
+      dateFields.forEach(field => {
+        if (row[field]) {
+          const d = new Date(row[field])
+          if (isNaN(d.getTime())) {
+            errors.push(`${field}: 日付形式不正`)
+          } else if (d < threeMonthsAgo) {
+            errors.push(`${field}: 3ヶ月より前`)
+          } else if (d > now) {
+            errors.push(`${field}: 未来の日付`)
+          }
+        }
+      })
+
+      // transfer_execution_date が service_and_billing_start_date の2ヶ月以降かチェック
+      if (row.transfer_execution_date && row.service_and_billing_start_date) {
+        const transferDate = new Date(row.transfer_execution_date)
+        const serviceDate = new Date(row.service_and_billing_start_date)
+
+        if (!isNaN(transferDate.getTime()) && !isNaN(serviceDate.getTime())) {
+          const minTransferDate = new Date(serviceDate)
+          minTransferDate.setMonth(minTransferDate.getMonth() + 2)
+
+          if (transferDate < minTransferDate) {
+            errors.push("transfer_execution_date: service_and_billing_start_dateの2ヶ月以降である必要があります")
+          }
+        }
+      }
+
+      row.validation_result = errors.length > 0 ? errors.join(", ") : "OK"
+      return row
+    })
   }
 
   // Excel等のダブルクォート囲みに対応した行パーサー
@@ -159,12 +220,18 @@
     "
   >
     {#if jsonResult}
+      {#if validationWarning}
+        <div style="width: 100%; text-align: left; background: #fffbe6; border: 1px solid #ffe58f; padding: 10px; border-radius: 4px; margin-bottom: 10px; color: #faad14;">
+          ⚠️ {validationWarning}
+        </div>
+      {/if}
+
       <div style="width: 100%; text-align: left; max-height: 300px; overflow: auto; background: #f5f5f5; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
         <pre style="margin: 0; font-size: 12px;">{jsonResult}</pre>
       </div>
       <div style="display: flex; gap: 10px; justify-content: center;">
         <button 
-          on:click={() => (jsonResult = "")} 
+          on:click={() => { jsonResult = ""; validationWarning = ""; }} 
           style="padding: 8px 16px; cursor: pointer; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px;"
         >
           クリア
