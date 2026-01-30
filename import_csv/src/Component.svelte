@@ -14,6 +14,7 @@
   let useShiftJIS = false
   let validationWarning = ""
   let isChecking = false
+  let previewData = []
 
   // ヘッダー変換用マッピング定義
   let headerMapping = {}
@@ -73,6 +74,7 @@
               return newRow
             })
 
+            previewData = displayData
             jsonResult = JSON.stringify(displayData, null, 2)
 
             const errorCount = validatedData.filter(row => row.validation_result && row.validation_result !== "OK").length
@@ -82,6 +84,7 @@
           } catch (e) {
             alert(e.message)
             jsonResult = ""
+            previewData = []
             validationWarning = ""
           } finally {
             isChecking = false
@@ -141,12 +144,33 @@
         </div>
       {/if}
 
-      <div style="width: 100%; text-align: left; max-height: 300px; overflow: auto; background: #f5f5f5; padding: 10px; border-radius: 4px; margin-bottom: 10px;">
-        <pre style="margin: 0; font-size: 12px;">{jsonResult}</pre>
+      <div style="width: 100%; text-align: left; max-height: 300px; overflow: auto; background: #fff; border: 1px solid #eee; border-radius: 4px; margin-bottom: 10px;">
+        {#if previewData.length > 0}
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+            <thead style="position: sticky; top: 0; background: #f5f5f5; z-index: 1;">
+              <tr>
+                {#each Object.keys(previewData[0]) as header}
+                  <th style="padding: 8px; border-bottom: 2px solid #ddd; text-align: left; white-space: nowrap;">{header === 'validation_result' ? 'バリデーション結果' : header}</th>
+                {/each}
+              </tr>
+            </thead>
+            <tbody>
+              {#each previewData as row}
+                <tr style="border-bottom: 1px solid #eee; background-color: {row.validation_result && row.validation_result !== 'OK' ? '#fff1f0' : 'transparent'};">
+                  {#each Object.keys(previewData[0]) as key}
+                    <td style="padding: 8px; white-space: nowrap;">{row[key]}</td>
+                  {/each}
+                </tr>
+              {/each}
+            </tbody>
+          </table>
+        {:else}
+          <pre style="margin: 0; font-size: 12px; padding: 10px;">{jsonResult}</pre>
+        {/if}
       </div>
       <div style="display: flex; gap: 10px; justify-content: center;">
         <button 
-          on:click={() => { jsonResult = ""; validationWarning = ""; }} 
+          on:click={() => { jsonResult = ""; previewData = []; validationWarning = ""; }} 
           style="padding: 8px 16px; cursor: pointer; background: #f0f0f0; border: 1px solid #ccc; border-radius: 4px;"
         >
           クリア

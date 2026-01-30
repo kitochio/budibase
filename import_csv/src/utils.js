@@ -152,6 +152,8 @@ export const validateData = (data, labelMap = {}) => {
 
     if (row._is_duplicate) {
       errors.push(`${getLabel("serial_number")}: 登録済`)
+      // エラーメッセージ生成後は不要なので削除（表示から消すため）
+      delete row._is_duplicate
     }
 
     row.validation_result = errors.length > 0 ? errors.join(", ") : "OK"
