@@ -1,0 +1,33 @@
+{
+  "type": "component",
+  "metadata": {
+    "svelteMajor": 5
+  },
+  "schema": {
+    "name": "import_csv",
+    "friendlyName": "import_csv",
+    "description": "An amazing Budibase component!",
+    "icon": "Text",
+    "settings": [
+      {
+        "type": "text",
+        "key": "mappingJson",
+        "label": "Header Mapping (JSON)",
+        "defaultValue": "{\n  \"ステータス\": \"status\",\n  \"#通番\": \"serial_number\",\n  \"顧客名\": \"customer_name\",\n  \"サブスク事業者\": \"subscription_company_key\",\n  \"月額料金（税抜き）\": \"monthly_fee\",\n  \"譲渡月数\": \"transfer_months\",\n  \"契約/申込書\": \"contract_and_application_form\",\n  \"初期費用\": \"Initial_cost\",\n  \"申込日\": \"application_date\",\n  \"サービス/課金開始日\": \"service_and_billing_start_date\",\n  \"譲渡申込期日\": \"transfer_application_deadline\",\n  \"譲渡実行日\": \"transfer_execution_date\",\n  \"失注理由\": \"reason_for_loss_order\",\n  \"説明\": \"explanation\"\n}",
+        "description": "CSVヘッダーをJSONキーに変換するマッピング定義 (JSON形式)"
+      },
+      {
+        "type": "event",
+        "key": "onImport",
+        "label": "On Import",
+        "description": "インポート実行時に発火します",
+        "context": [
+          {
+            "key": "json",
+            "label": "JSON Data"
+          }
+        ]
+      }
+    ]
+  }
+}
