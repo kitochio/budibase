@@ -73,7 +73,7 @@
             })
 
             previewData = displayData
-            jsonResult = JSON.stringify(displayData, null, 2)
+            jsonResult = JSON.stringify(validatedData, null, 2)
 
             const errorCount = validatedData.filter(row => row.validation_result && row.validation_result !== "OK").length
             if (errorCount > 0) {
