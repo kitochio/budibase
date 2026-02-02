@@ -19,14 +19,12 @@
   // ヘッダー変換用マッピング定義
   let headerMapping = {}
 
-  // 設定値(mappingJson)が変更されたら自動的にオブジェクトに変換する
-  $: {
-    try {
-      headerMapping = mappingJson ? JSON.parse(mappingJson) : defaultMapping
-    } catch (e) {
-      console.error("マッピングJSONのパースに失敗しました", e)
-      headerMapping = defaultMapping
-    }
+  // 設定値(mappingJson)を初回のみオブジェクトに変換する
+  try {
+    headerMapping = mappingJson ? JSON.parse(mappingJson) : defaultMapping
+  } catch (e) {
+    console.error("マッピングJSONのパースに失敗しました", e)
+    headerMapping = defaultMapping
   }
 
   const handleDragOver = (e) => {
