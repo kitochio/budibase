@@ -13,6 +13,18 @@
         "type": "text",
         "key": "text",
         "label": "Text"
+      },
+      {
+        "type": "event",
+        "key": "onUpload",
+        "label": "On Upload",
+        "description": "アップロードボタン押下時に発火します",
+        "context": [
+          {
+            "key": "file",
+            "label": "File Data"
+          }
+        ]
       }
     ]
   }
