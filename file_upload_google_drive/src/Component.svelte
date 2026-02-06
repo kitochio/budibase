@@ -1,8 +1,8 @@
 <script>
   import { getContext } from "svelte"
 
-  export let text
   export let onUpload
+  export let triggerText
 
   const { styleable } = getContext("sdk")
   const component = getContext("component")
@@ -10,6 +10,7 @@
   let isDragging = false
   let droppedFile = null
   let fileData = null
+  let previousTriggerText = ""
 
   const onDragOver = (e) => {
     e.preventDefault()
@@ -44,10 +45,11 @@
     reader.readAsDataURL(file)
   }
 
-  const handleUploadClick = () => {
-    if (onUpload && fileData) {
+  $: {
+    if (triggerText === "run" && previousTriggerText !== "run" && fileData && onUpload) {
       onUpload({ file: fileData })
     }
+    previousTriggerText = triggerText
   }
 </script>
 
@@ -63,10 +65,6 @@
   {#if droppedFile}
     <p>File ready: <strong>{droppedFile.name}</strong></p>
   {:else}
-    <p>{text || "Drag & Drop file here"}</p>
+    <p>Drag & Drop file here</p>
   {/if}
 </div>
-
-<button on:click={handleUploadClick} disabled={!fileData} style="margin-top: 10px; padding: 8px 16px; cursor: pointer;">
-  Upload
-</button>

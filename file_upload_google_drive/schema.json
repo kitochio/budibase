@@ -11,8 +11,9 @@
     "settings": [
       {
         "type": "text",
-        "key": "text",
-        "label": "Text"
+        "key": "triggerText",
+        "label": "Trigger Text",
+        "description": "Input 'run' to execute upload"
       },
       {
         "type": "event",
