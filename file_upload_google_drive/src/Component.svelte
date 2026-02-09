@@ -53,18 +53,19 @@
   }
 </script>
 
-<div
-  role="region"
-  aria-label="File upload drop zone"
-  use:styleable={$component.styles}
-  on:dragover={onDragOver}
-  on:dragleave={onDragLeave}
-  on:drop={onDrop}
-  style="border: 2px dashed {isDragging ? '#1a73e8' : '#ccc'}; padding: 20px; text-align: center; transition: border 0.2s;"
->
-  {#if droppedFile}
-    <p>File ready: <strong>{droppedFile.name}</strong></p>
-  {:else}
-    <p>Drag & Drop file here</p>
-  {/if}
+<div use:styleable={$component.styles}>
+  <div
+    role="region"
+    aria-label="File upload drop zone"
+    on:dragover={onDragOver}
+    on:dragleave={onDragLeave}
+    on:drop={onDrop}
+    style="border: 2px dashed {isDragging ? '#1a73e8' : '#888'}; background-color: {isDragging ? '#f0f8ff' : '#fafafa'}; border-radius: 8px; padding: 32px; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center;"
+  >
+    {#if droppedFile}
+      <p>準備完了: <strong>{droppedFile.name}</strong></p>
+    {:else}
+      <p style="margin: 0; color: #666; font-weight: 500;">ここにファイルをドラッグ＆ドロップしてください</p>
+    {/if}
+  </div>
 </div>
