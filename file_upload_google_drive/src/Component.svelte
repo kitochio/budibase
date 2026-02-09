@@ -12,6 +12,8 @@
   let fileData = null
   let previousTriggerText = ""
   let fileInput
+  let errorMessage = ""
+  const MAX_SIZE_MB = 5 // 制限サイズ (MB)
 
   const onDragOver = (e) => {
     e.preventDefault()
@@ -26,16 +28,27 @@
     e.preventDefault()
     isDragging = false
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      droppedFile = e.dataTransfer.files[0]
-      prepareFileForApi(droppedFile)
+      handleFileSelection(e.dataTransfer.files[0])
     }
   }
 
   const onFileSelect = (e) => {
     if (e.target.files && e.target.files.length > 0) {
-      droppedFile = e.target.files[0]
-      prepareFileForApi(droppedFile)
+      handleFileSelection(e.target.files[0])
     }
+  }
+
+  const handleFileSelection = (file) => {
+    errorMessage = ""
+    // サイズチェック (バイト単位)
+    if (file.size > MAX_SIZE_MB * 1024 * 1024) {
+      errorMessage = `ファイルサイズは${MAX_SIZE_MB}MB以下にしてください。`
+      droppedFile = null
+      fileData = null
+      return
+    }
+    droppedFile = file
+    prepareFileForApi(file)
   }
 
   const onClick = () => {
@@ -82,6 +95,9 @@
       <p>準備完了: <strong>{droppedFile.name}</strong></p>
     {:else}
       <p style="margin: 0; color: #666; font-weight: 500;">クリックまたはファイルをドラッグ＆ドロップしてください</p>
+    {/if}
+    {#if errorMessage}
+      <p style="margin: 8px 0 0 0; color: #d32f2f; font-size: 0.9em;">{errorMessage}</p>
     {/if}
   </div>
 </div>
