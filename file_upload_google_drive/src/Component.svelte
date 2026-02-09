@@ -11,6 +11,7 @@
   let droppedFile = null
   let fileData = null
   let previousTriggerText = ""
+  let fileInput
 
   const onDragOver = (e) => {
     e.preventDefault()
@@ -28,6 +29,17 @@
       droppedFile = e.dataTransfer.files[0]
       prepareFileForApi(droppedFile)
     }
+  }
+
+  const onFileSelect = (e) => {
+    if (e.target.files && e.target.files.length > 0) {
+      droppedFile = e.target.files[0]
+      prepareFileForApi(droppedFile)
+    }
+  }
+
+  const onClick = () => {
+    fileInput.click()
   }
 
   const prepareFileForApi = (file) => {
@@ -54,18 +66,22 @@
 </script>
 
 <div use:styleable={$component.styles}>
+  <input type="file" bind:this={fileInput} on:change={onFileSelect} style="display: none;" />
   <div
-    role="region"
+    role="button"
     aria-label="File upload drop zone"
     on:dragover={onDragOver}
     on:dragleave={onDragLeave}
     on:drop={onDrop}
-    style="border: 2px dashed {isDragging ? '#1a73e8' : '#888'}; background-color: {isDragging ? '#f0f8ff' : '#fafafa'}; border-radius: 8px; padding: 32px; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center;"
+    on:click={onClick}
+    on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick()}
+    tabindex="0"
+    style="border: 2px dashed {isDragging ? '#1a73e8' : '#888'}; background-color: {isDragging ? '#f0f8ff' : '#fafafa'}; border-radius: 8px; padding: 32px; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer;"
   >
     {#if droppedFile}
       <p>準備完了: <strong>{droppedFile.name}</strong></p>
     {:else}
-      <p style="margin: 0; color: #666; font-weight: 500;">ここにファイルをドラッグ＆ドロップしてください</p>
+      <p style="margin: 0; color: #666; font-weight: 500;">クリックまたはファイルをドラッグ＆ドロップしてください</p>
     {/if}
   </div>
 </div>
