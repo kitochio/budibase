@@ -111,12 +111,14 @@
 </script>
 
 <div use:styleable={$component.styles}>
+  {#if isChecking || !jsonResult}
   <div style="margin-bottom: 10px;">
     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
       <input type="checkbox" bind:checked={useShiftJIS} />
       <span style="font-size: 14px; color: #333;">日本語Excel (Shift-JIS) として読み込む</span>
     </label>
   </div>
+  {/if}
 
   <div
     role="region"
@@ -125,7 +127,7 @@
     on:dragleave={handleDragLeave}
     on:drop={handleDrop}
     style="
-      border: 2px dashed {isDragging ? '#2D7FF9' : '#ccc'};
+      border: {!isChecking && jsonResult ? 'none' : `2px dashed ${isDragging ? '#2D7FF9' : '#ccc'}`};
       padding: 20px;
       text-align: center;
       background: {isDragging ? '#eef4ff' : 'transparent'};
@@ -144,7 +146,7 @@
       </p>
     {:else if jsonResult}
       {#if validationWarning}
-        <div style="width: 100%; text-align: left; background: #fffbe6; border: 1px solid #ffe58f; padding: 10px; border-radius: 4px; margin-bottom: 10px; color: #faad14;">
+        <div style="width: 100%; text-align: left; background: #fff1f0; border: 1px solid #ffccc7; padding: 10px; border-radius: 4px; margin-bottom: 10px; color: #333;">
           ⚠️ {validationWarning}
         </div>
       {/if}
