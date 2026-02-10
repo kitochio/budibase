@@ -77,7 +77,7 @@
 
             const errorCount = validatedData.filter(row => row.validation_result && row.validation_result !== "OK").length
             if (errorCount > 0) {
-              validationWarning = `${errorCount}件のデータにバリデーション警告があります。JSONデータ内の "validation_result" を確認してください。`
+              validationWarning = `${errorCount}件のデータが取込対象外です。赤くなった行のバリデーション結果を確認してください。`
             }
           } catch (e) {
             alert(e.message)
@@ -96,6 +96,13 @@
   }
 
   const handleImport = () => {
+    const hasErrors = previewData.some(row => row.validation_result && row.validation_result !== "OK")
+    if (hasErrors) {
+      if (!confirm("取込対象外のデータがあります、取込対象外のデータは取り込まれませんがインポートを実行しますか？")) {
+        return
+      }
+    }
+
     // プロパティとして渡された関数を実行する
     if (onImport) {
       onImport({ json: jsonResult })
