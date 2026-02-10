@@ -102,13 +102,19 @@
     style="border: 2px {droppedFile ? 'solid' : 'dashed'} {isDragging ? '#1a73e8' : '#888'}; background-color: {isDragging ? '#f0f8ff' : '#fafafa'}; border-radius: 8px; padding: 32px; text-align: center; transition: all 0.2s; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; width: 100%; box-sizing: border-box; min-height: 150px; min-width: 300px;"
   >
     {#if droppedFile}
-      <p><strong>{droppedFile.name}</strong></p>
-      <button
-        on:click={clearFile}
-        style="margin-top: 8px; background: none; border: 1px solid #999; border-radius: 4px; color: #666; padding: 4px 12px; cursor: pointer; font-size: 0.85em;"
-      >
-        キャンセル
-      </button>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <p style="margin: 0;"><strong>{droppedFile.name}</strong></p>
+        <span
+          role="button"
+          tabindex="0"
+          on:click={clearFile}
+          on:keydown={(e) => (e.key === 'Enter' || e.key === ' ') && clearFile(e)}
+          style="cursor: pointer; color: #666; font-size: 14px; border: 1px solid #ccc; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; background: #fff;"
+          title="キャンセル"
+        >
+          ✕
+        </span>
+      </div>
     {:else}
       <p style="margin: 0; color: #666; font-weight: 500;">クリックまたはファイルをドラッグ＆ドロップしてください</p>
     {/if}
