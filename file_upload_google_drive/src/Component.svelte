@@ -116,7 +116,7 @@
         </span>
       </div>
     {:else}
-      <p style="margin: 0; color: #666; font-weight: 500;">クリックまたはファイルをドラッグ＆ドロップしてください</p>
+      <p style="margin: 0; color: #666; font-weight: 500;">クリックまたはファイルをドラッグ＆ドロップしてください（5MBまで）</p>
     {/if}
     {#if errorMessage}
       <p style="margin: 8px 0 0 0; color: #d32f2f; font-size: 0.9em;">{errorMessage}</p>
