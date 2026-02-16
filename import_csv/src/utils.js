@@ -3,7 +3,6 @@ export const defaultMapping = {
   "ステータス": "status",
   "#通番": "serial_number",
   "顧客名": "customer_name",
-  "サブスク事業者": "subscription_company_key",
   "月額料金（税抜き）": "monthly_fee",
   "譲渡月数": "transfer_months",
   "契約/申込書": "contract_and_application_form",
