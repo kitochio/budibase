@@ -96,54 +96,77 @@ export const checkDuplicates = async (data, tableId, API) => {
   return checkedData
 }
 
+// バリデーション設定（ルール変更時はここを修正）
+const VALIDATION_CONFIG = {
+  dateFields: ["application_date", "service_and_billing_start_date", "transfer_application_deadline"],
+  pastLimitMonths: 3,
+  transferOffsetMonths: 2
+}
+
+// 個別のチェック処理：日付フィールド
+const checkDateFields = (row, getLabel, now, pastLimit) => {
+  const errors = []
+  VALIDATION_CONFIG.dateFields.forEach(field => {
+    if (row[field]) {
+      const d = new Date(row[field])
+      const label = getLabel(field)
+      if (isNaN(d.getTime())) {
+        errors.push(`${label}: 日付不正`)
+      } else if (d < pastLimit) {
+        errors.push(`${label}: ${VALIDATION_CONFIG.pastLimitMonths}ヶ月以前`)
+      } else if (d > now) {
+        errors.push(`${label}: 未来日付`)
+      }
+    }
+  })
+  return errors
+}
+
+// 個別のチェック処理：譲渡日とサービス開始日の相関
+const checkTransferCorrelation = (row, getLabel) => {
+  const errors = []
+  if (row.transfer_execution_date && row.service_and_billing_start_date) {
+    const transferDate = new Date(row.transfer_execution_date)
+    const serviceDate = new Date(row.service_and_billing_start_date)
+
+    if (!isNaN(transferDate.getTime()) && !isNaN(serviceDate.getTime())) {
+      const minTransferDate = new Date(serviceDate)
+      minTransferDate.setMonth(minTransferDate.getMonth() + VALIDATION_CONFIG.transferOffsetMonths)
+
+      if (transferDate < minTransferDate) {
+        const labelTransfer = getLabel("transfer_execution_date")
+        const labelService = getLabel("service_and_billing_start_date")
+        errors.push(`${labelTransfer}: ${labelService}の${VALIDATION_CONFIG.transferOffsetMonths}ヶ月後以降`)
+      }
+    }
+  }
+  return errors
+}
+
 // バリデーション処理
 export const validateData = (data, labelMap = {}) => {
   const now = new Date()
-  const threeMonthsAgo = new Date()
-  threeMonthsAgo.setMonth(now.getMonth() - 3)
+  const pastLimit = new Date()
+  pastLimit.setMonth(now.getMonth() - VALIDATION_CONFIG.pastLimitMonths)
   
-  const dateFields = ["application_date", "service_and_billing_start_date", "transfer_application_deadline"]
   const getLabel = (key) => labelMap[key] || key
 
   // ファイル内でのserial_number重複カウント
-  const serialCounts = {}
-  data.forEach(row => {
+  const serialCounts = data.reduce((acc, row) => {
     if (row.serial_number) {
-      serialCounts[row.serial_number] = (serialCounts[row.serial_number] || 0) + 1
+      acc[row.serial_number] = (acc[row.serial_number] || 0) + 1
     }
-  })
+    return acc
+  }, {})
 
-  return data.map(row => {
+  return data.map(originalRow => {
+    // 副作用を避けるため、元のデータをコピーして使用する
+    const row = { ...originalRow }
     const errors = []
-    dateFields.forEach(field => {
-      if (row[field]) {
-        const d = new Date(row[field])
-        const label = getLabel(field)
-        if (isNaN(d.getTime())) {
-          errors.push(`${label}: 日付不正`)
-        } else if (d < threeMonthsAgo) {
-          errors.push(`${label}: 3ヶ月以前`)
-        } else if (d > now) {
-          errors.push(`${label}: 未来日付`)
-        }
-      }
-    })
 
-    if (row.transfer_execution_date && row.service_and_billing_start_date) {
-      const transferDate = new Date(row.transfer_execution_date)
-      const serviceDate = new Date(row.service_and_billing_start_date)
-
-      if (!isNaN(transferDate.getTime()) && !isNaN(serviceDate.getTime())) {
-        const minTransferDate = new Date(serviceDate)
-        minTransferDate.setMonth(minTransferDate.getMonth() + 2)
-
-        if (transferDate < minTransferDate) {
-          const labelTransfer = getLabel("transfer_execution_date")
-          const labelService = getLabel("service_and_billing_start_date")
-          errors.push(`${labelTransfer}: ${labelService}の2ヶ月後以降`)
-        }
-      }
-    }
+    // 分割したチェック関数を呼び出す
+    errors.push(...checkDateFields(row, getLabel, now, pastLimit))
+    errors.push(...checkTransferCorrelation(row, getLabel))
 
     if (row.serial_number && serialCounts[row.serial_number] > 1) {
       errors.push(`${getLabel("serial_number")}: ファイル内で重複`)
