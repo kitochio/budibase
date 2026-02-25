@@ -5,14 +5,27 @@
   },
   "schema": {
     "name": "output_zengin_choice",
-    "friendlyName": "output_zengin_choice",
-    "description": "An amazing Budibase component!",
-    "icon": "Text",
+    "friendlyName": "全銀データ出力",
+    "description": "全銀フォーマットのCSVを生成してダウンロードします。",
+    "icon": "Download",
     "settings": [
       {
         "type": "text",
-        "key": "text",
-        "label": "Text"
+        "key": "json",
+        "label": "ヘッダー情報 (JSON)",
+        "required": true
+      },
+      {
+        "type": "text",
+        "key": "json2",
+        "label": "明細情報 (JSON)",
+        "required": true
+      },
+      {
+        "type": "text",
+        "key": "exUser",
+        "label": "更新ユーザー",
+        "required": true
       }
     ]
   }
