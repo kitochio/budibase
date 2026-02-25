@@ -1,0 +1,84 @@
+{
+  "type": "automation",
+  "metadata": {},
+  "schema": {
+    "name": "budibase-automation",
+    "tagline": "An amazing Budibase automation!",
+    "icon": "Actions",
+    "description": "An amazing Budibase automation!",
+    "type": "action",
+    "stepId": "budibase-automation",
+    "inputs": {
+      "text": ""
+    },
+    "schema": {
+      "inputs": {
+        "properties": {
+          "smtpHost": {
+            "type": "string",
+            "title": "SMTP Host"
+          },
+          "smtpPort": {
+            "type": "number",
+            "title": "SMTP Port"
+          },
+          "smtpUser": {
+            "type": "string",
+            "title": "SMTP Username"
+          },
+          "smtpPass": {
+            "type": "string",
+            "title": "SMTP Password"
+          },
+          "from": {
+            "type": "string",
+            "title": "From (email address)"
+          },
+          "to": {
+            "type": "string",
+            "title": "To (email address)"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Email Subject"
+          },
+          "bodyText": {
+            "type": "string",
+            "title": "Email Body"
+          },
+          "csvData": {
+            "type": "string",
+            "title": "CSV Data",
+            "description": "Pass the CSV string you want to attach"
+          }
+        },
+        "required": [
+          "smtpHost",
+          "smtpPort",
+          "smtpUser",
+          "smtpPass",
+          "from",
+          "to",
+          "subject",
+          "csvData"
+        ]
+      },
+      "outputs": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the action was successful"
+          },
+          "message": {
+            "type": "string",
+            "description": "What was output"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      }
+    }
+  }
+}
