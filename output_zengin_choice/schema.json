@@ -1,0 +1,19 @@
+{
+  "type": "component",
+  "metadata": {
+    "svelteMajor": 5
+  },
+  "schema": {
+    "name": "output_zengin_choice",
+    "friendlyName": "output_zengin_choice",
+    "description": "An amazing Budibase component!",
+    "icon": "Text",
+    "settings": [
+      {
+        "type": "text",
+        "key": "text",
+        "label": "Text"
+      }
+    ]
+  }
+}
