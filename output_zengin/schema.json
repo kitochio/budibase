@@ -11,8 +11,21 @@
     "settings": [
       {
         "type": "text",
-        "key": "text",
-        "label": "Text"
+        "label": "json",
+        "key": "json",
+        "required": true
+      },
+      {
+        "type": "text",
+        "label": "json2",
+        "key": "json2",
+        "required": true
+      },
+      {
+        "type": "text",
+        "label": "exUser",
+        "key": "exUser",
+        "required": true
       }
     ]
   }
