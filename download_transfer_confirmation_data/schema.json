@@ -7,12 +7,12 @@
     "name": "download_transfer_confirmation_data",
     "friendlyName": "download_transfer_confirmation_data",
     "description": "An amazing Budibase component!",
-    "icon": "Text",
+    "icon": "Download",
     "settings": [
       {
         "type": "text",
         "key": "text",
-        "label": "Text"
+        "label": "JSON"
       }
     ]
   }
