@@ -98,22 +98,29 @@ export const checkDuplicates = async (data, tableId, API) => {
 
 // バリデーション設定（ルール変更時はここを修正）
 const VALIDATION_CONFIG = {
-  dateFields: ["application_date", "service_and_billing_start_date", "transfer_application_deadline"],
-  pastLimitMonths: 3,
+  dateFields: [
+    { key: "application_date", pastLimitMonths: 6 },
+    { key: "service_and_billing_start_date", pastLimitMonths: 3 },
+    { key: "transfer_application_deadline", pastLimitMonths: 3 }
+  ],
   transferOffsetMonths: 2
 }
 
 // 個別のチェック処理：日付フィールド
-const checkDateFields = (row, getLabel, now, pastLimit) => {
+const checkDateFields = (row, getLabel, now) => {
   const errors = []
-  VALIDATION_CONFIG.dateFields.forEach(field => {
-    if (row[field]) {
-      const d = new Date(row[field])
-      const label = getLabel(field)
+  VALIDATION_CONFIG.dateFields.forEach(({ key, pastLimitMonths }) => {
+    if (row[key]) {
+      const d = new Date(row[key])
+      const label = getLabel(key)
+      
+      const pastLimit = new Date(now)
+      pastLimit.setMonth(now.getMonth() - pastLimitMonths)
+
       if (isNaN(d.getTime())) {
         errors.push(`${label}: 日付不正`)
       } else if (d < pastLimit) {
-        errors.push(`${label}: ${VALIDATION_CONFIG.pastLimitMonths}ヶ月以前`)
+        errors.push(`${label}: ${pastLimitMonths}ヶ月以前`)
       } else if (d > now) {
         errors.push(`${label}: 未来日付`)
       }
@@ -146,8 +153,6 @@ const checkTransferCorrelation = (row, getLabel) => {
 // バリデーション処理
 export const validateData = (data, labelMap = {}) => {
   const now = new Date()
-  const pastLimit = new Date()
-  pastLimit.setMonth(now.getMonth() - VALIDATION_CONFIG.pastLimitMonths)
   
   const getLabel = (key) => labelMap[key] || key
 
@@ -165,7 +170,7 @@ export const validateData = (data, labelMap = {}) => {
     const errors = []
 
     // 分割したチェック関数を呼び出す
-    errors.push(...checkDateFields(row, getLabel, now, pastLimit))
+    errors.push(...checkDateFields(row, getLabel, now))
     errors.push(...checkTransferCorrelation(row, getLabel))
 
     if (row.serial_number && serialCounts[row.serial_number] > 1) {
