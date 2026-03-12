@@ -98,12 +98,35 @@ export const checkDuplicates = async (data, tableId, API) => {
 
 // バリデーション設定（ルール変更時はここを修正）
 const VALIDATION_CONFIG = {
+  requiredFields: [
+    "serial_number",
+    "customer_name",
+    "monthly_fee",
+    "transfer_months",
+    "application_date",
+    "service_and_billing_start_date",
+    "transfer_application_deadline",
+    "transfer_execution_date"
+  ],
   dateFields: [
     { key: "application_date", pastLimitMonths: 6 },
     { key: "service_and_billing_start_date", pastLimitMonths: 3 },
     { key: "transfer_application_deadline", pastLimitMonths: 3 }
   ],
   transferOffsetMonths: 2
+}
+
+// 個別のチェック処理：必須項目
+const checkRequiredFields = (row, getLabel) => {
+  const errors = []
+  VALIDATION_CONFIG.requiredFields.forEach(key => {
+    // row[key] が null, undefined, or an empty string の場合にエラーとする
+    if (row[key] == null || row[key] === '') {
+      const label = getLabel(key)
+      errors.push(`${label}: 必須`)
+    }
+  })
+  return errors
 }
 
 // 個別のチェック処理：日付フィールド
@@ -170,6 +193,7 @@ export const validateData = (data, labelMap = {}) => {
     const errors = []
 
     // 分割したチェック関数を呼び出す
+    errors.push(...checkRequiredFields(row, getLabel))
     errors.push(...checkDateFields(row, getLabel, now))
     errors.push(...checkTransferCorrelation(row, getLabel))
 
