@@ -9,17 +9,45 @@
     "type": "action",
     "stepId": "send-email-csv-attachment",
     "inputs": {
-      "text": ""
+      "apiToken": "",
+      "from": "",
+      "to": "",
+      "subject": "",
+      "bodyText": "",
+      "csvData": ""
     },
     "schema": {
       "inputs": {
         "properties": {
-          "text": {
+          "apiToken": {
             "type": "string",
-            "title": "Log"
+            "title": "blastengine API Token"
+          },
+          "from": {
+            "type": "string",
+            "title": "From",
+            "description": "e.g. 'Sender Name <from@example.com>'"
+          },
+          "to": {
+            "type": "string",
+            "title": "To",
+            "description": "e.g. 'to@example.com'"
+          },
+          "subject": {
+            "type": "string",
+            "title": "Subject"
+          },
+          "bodyText": {
+            "type": "string",
+            "title": "Body Text"
+          },
+          "csvData": {
+            "type": "string",
+            "title": "CSV Data (String)",
+            "description": "CSV content as a string. e.g. from a previous 'Generate CSV' step."
           }
         },
-        "required": ["text"]
+        "required": ["apiToken", "from", "to", "subject", "csvData"]
       },
       "outputs": {
         "properties": {
@@ -30,6 +58,10 @@
           "message": {
             "type": "string",
             "description": "What was output"
+          },
+          "delivery_id": {
+            "type": "string",
+            "description": "The delivery ID from blastengine"
           }
         },
         "required": ["success", "message"]
