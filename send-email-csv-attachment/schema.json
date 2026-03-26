@@ -1,0 +1,39 @@
+{
+  "type": "automation",
+  "metadata": {},
+  "schema": {
+    "name": "send-email-csv-attachment",
+    "tagline": "An amazing Budibase automation!",
+    "icon": "Actions",
+    "description": "An amazing Budibase automation!",
+    "type": "action",
+    "stepId": "send-email-csv-attachment",
+    "inputs": {
+      "text": ""
+    },
+    "schema": {
+      "inputs": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Log"
+          }
+        },
+        "required": ["text"]
+      },
+      "outputs": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Whether the action was successful"
+          },
+          "message": {
+            "type": "string",
+            "description": "What was output"
+          }
+        },
+        "required": ["success", "message"]
+      }
+    }
+  }
+}
