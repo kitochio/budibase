@@ -4,42 +4,34 @@ export default async function run({
   inputs,
 }: AutomationStepInputBase & { inputs: Record<string, any> }) {
   try {
-    // 入力値の取得（不要になったSMTP設定の代わりにAPI Tokenを取得）
-    const {
-      apiToken,     // blastengineのAPIキー
-      from,
-      to,
-      subject,
-      bodyText,
-      csvData,
-    } = inputs
+    const { apiToken, from, to, subject, bodyText, csvData } = inputs
 
-    // 必須項目のバリデーション
-    if (!apiToken || !from || !to || !csvData) {
-      throw new Error(
-        "Missing required inputs: apiToken, from, to, and csvData are required."
-      )
-    }
-    // 1. FormDataの作成（multipart/form-data形式）
-    // Node.js環境（Budibase Automation）では標準のFormDataが利用可能です
     const formData = new FormData()
-    formData.append("from", from)
-    formData.append("to", to)
-    formData.append("subject", subject)
-    formData.append("text_part", bodyText || "")
 
-    // 2. CSV文字列をファイル（Blob）として追加
-    // Node.jsのBlobを利用して、ファイル名「data.csv」を指定します
-    const csvBlob = new Blob([csvData], { type: 'text/csv' })
-    formData.append("attachments", csvBlob, "data.csv")
+    // 1. 成功した形式（toを文字列）でペイロードを作成
+    const dataPayload = {
+      from: { email: from },
+      to: to, // ★ここを [ {email: to} ] にせず、そのまま文字列にする
+      subject: subject || "CSV Report",
+      text_part: bodyText || " "
+    }
 
-    // 3. blastengine APIへリクエスト送信
-    const url = "https://ap.blastengine.jp/v1/deliveries/transaction"
-    const response = await fetch(url, {
+    // 2. dataパートをBlobとして追加（ファイル名は指定しないのが無難）
+    const dataBlob = new Blob([JSON.stringify(dataPayload)], { type: 'application/json' });
+    formData.append("data", dataBlob);
+
+    // 3. 添付ファイルを追加
+    if (csvData) {
+      // csvDataが文字列の場合はBlobに変換
+      const csvBlob = new Blob([csvData], { type: 'text/csv' });
+      formData.append("attachments", csvBlob, "report.csv");
+    }
+
+    const response = await fetch("https://app.engn.jp/api/v1/deliveries/transaction", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${apiToken}`,
-        // Content-Typeは設定しないでください。FormDataを渡すと自動で設定されます。
+        "Authorization": `Bearer ${apiToken}`
+        // Content-Typeは指定せず、fetchに任せる
       },
       body: formData
     })
@@ -47,24 +39,22 @@ export default async function run({
     const result = await response.json() as Record<string, any>
 
     if (!response.ok) {
-      throw new Error(`blastengine error: ${JSON.stringify(result)}`)
+      return {
+        success: false,
+        message: `API error: ${response.status}`,
+        details: result
+      }
     }
-
-    const message = `Email sent successfully via API to: ${to}`
-    console.log(message, result)
 
     return {
       success: true,
-      message,
-      delivery_id: result.delivery_id // blastengineが返すID
+      delivery_id: result.delivery_id
     }
 
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error)
-    console.error(errorMessage)
+  } catch (error: any) {
     return {
       success: false,
-      message: errorMessage
+      message: error.message
     }
   }
 }
