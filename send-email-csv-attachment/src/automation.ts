@@ -24,7 +24,7 @@ export default async function run({
     if (csvData) {
       // csvDataが文字列の場合はBlobに変換
       const csvBlob = new Blob([csvData], { type: 'text/csv' });
-      formData.append("attachments", csvBlob, "report.csv");
+      formData.append("file", csvBlob, "report.csv");
     }
 
     const response = await fetch("https://app.engn.jp/api/v1/deliveries/transaction", {
@@ -36,12 +36,19 @@ export default async function run({
       body: formData
     })
 
-    const result = await response.json() as Record<string, any>
+    const responseText = await response.text()
+    let result: Record<string, any> = {}
+    try {
+      result = JSON.parse(responseText)
+    } catch {
+      // JSONでない場合はそのままtextを返す
+    }
 
     if (!response.ok) {
       return {
         success: false,
         message: `API error: ${response.status}`,
+        responseText,
         details: result
       }
     }
