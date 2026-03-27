@@ -24,7 +24,7 @@ export default async function run({
     if (csvData) {
       // csvDataが文字列の場合はBlobに変換
       const csvBlob = new Blob([csvData], { type: 'text/csv' });
-      formData.append("file", csvBlob, "report.csv");
+      formData.append("file", csvBlob, "data.csv");
     }
 
     const response = await fetch("https://app.engn.jp/api/v1/deliveries/transaction", {
