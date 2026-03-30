@@ -18,6 +18,17 @@
         "type": "text",
         "key": "collectionDate",
         "label": "回収日 (例: 2026-03-31)"
+      },
+      {
+        "type": "event",
+        "key": "onCalculated",
+        "label": "計算完了時",
+        "context": [
+          {
+            "label": "サマリーJSON",
+            "key": "summaryJson"
+          }
+        ]
       }
     ]
   }

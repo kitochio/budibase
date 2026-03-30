@@ -3,6 +3,7 @@
 
   export let jsonData
   export let collectionDate
+  export let onCalculated
 
   const { styleable } = getContext("sdk")
   const component = getContext("component")
@@ -81,6 +82,19 @@
 
   function formatCurrency(amount) {
     return "¥" + amount.toLocaleString("ja-JP")
+  }
+
+  $: if (groups.length > 0 && onCalculated) {
+    const summaryJson = JSON.stringify(
+      groups.map(g => ({
+        transfer_execution_date: g.transfer_execution_date,
+        total_transfer_amount_tax_included: g.total_transfer_amount_tax_included,
+        count: g.count,
+        format_months: formatMonths(g),
+        total_monthly_fee_tax_included: g.total_monthly_fee_tax_included,
+      }))
+    )
+    onCalculated({ summaryJson })
   }
 </script>
 
