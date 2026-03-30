@@ -5,14 +5,14 @@
   },
   "schema": {
     "name": "display_total_billing_amount",
-    "friendlyName": "display_total_billing_amount",
-    "description": "An amazing Budibase component!",
-    "icon": "Text",
+    "friendlyName": "譲渡サマリー",
+    "description": "譲渡実行日・月数別に譲渡金額合計・件数・月額合計を表示します",
+    "icon": "Table",
     "settings": [
       {
         "type": "text",
-        "key": "text",
-        "label": "Text"
+        "key": "jsonData",
+        "label": "JSONデータ"
       }
     ]
   }
