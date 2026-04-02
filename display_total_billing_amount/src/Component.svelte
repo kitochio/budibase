@@ -76,8 +76,8 @@
 
   function formatMonths(g) {
     const current = calcCurrentPayment(g.collection_completion_month, g.transfer_months, collectionDate)
-    if (current === null) return `${g.transfer_months}ヶ月`
-    return `${current}/${g.transfer_months}ヶ月目`
+    if (current === null) return `${g.transfer_months}回`
+    return `${current}回目/${g.transfer_months}回`
   }
 
   function formatCurrency(amount) {
