@@ -17,6 +17,10 @@ services:
       PLUGINS_DIR: /plugins
       BB_ADMIN_USER_EMAIL: admin@admin.com
       BB_ADMIN_USER_PASSWORD: admin
+      # --- ここから追加 ---
+      SELF_HOSTED: 1
+      BLACKLIST_IPS: ""
+      # ------------------
     volumes:
       - budibase_data:/data
       - C:\Users\hoiho\Documents\budibase\plugins:/plugins
