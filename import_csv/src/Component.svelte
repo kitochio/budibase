@@ -11,7 +11,7 @@
 
   let isDragging = false
   let jsonResult = ""
-  let useShiftJIS = true
+  let useShiftJIS = false
   let validationWarning = ""
   let isChecking = false
   let previewData = []
@@ -212,7 +212,7 @@
           on:click={handleImport} 
           style="padding: 8px 16px; cursor: pointer; background: #2D7FF9; color: white; border: none; border-radius: 4px; font-weight: bold;"
         >
-          インポート実行
+          取込実行
         </button>
       </div>
     {:else}

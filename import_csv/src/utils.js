@@ -3,6 +3,7 @@ export const defaultMapping = {
   "ステータス": "status",
   "#通番": "serial_number",
   "顧客名": "customer_name",
+  "申込サービス": "application_service",
   "月額料金（税抜き）": "monthly_fee",
   "譲渡月数": "transfer_months",
   "契約/申込書": "contract_and_application_form",
@@ -10,9 +11,7 @@ export const defaultMapping = {
   "申込日": "application_date",
   "サービス/課金開始日": "service_and_billing_start_date",
   "譲渡申込期日": "transfer_application_deadline",
-  "譲渡実行日": "transfer_execution_date",
-  "失注理由": "reason_for_loss_order",
-  "説明": "explanation"
+  "譲渡実行日": "transfer_execution_date"
 }
 
 // Excel等のダブルクォート囲みに対応した行パーサー
