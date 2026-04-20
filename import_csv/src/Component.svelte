@@ -12,6 +12,7 @@
   let isDragging = false
   let jsonResult = ""
   let useShiftJIS = false
+  let skipPastDateCheck = false
   let validationWarning = ""
   let isChecking = false
   let previewData = []
@@ -56,7 +57,7 @@
             return acc
           }, {})
 
-          const validatedData = validateData(data, reverseMapping)
+          const validatedData = validateData(data, reverseMapping, { skipPastDateCheck })
 
           const displayData = validatedData.map(row => {
             const newRow = {}
@@ -128,6 +129,10 @@
     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
       <input type="checkbox" bind:checked={useShiftJIS} />
       <span style="font-size: 14px; color: #333;">日本語Excel (Shift-JIS) として読み込む</span>
+    </label>
+    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+      <input type="checkbox" bind:checked={skipPastDateCheck} />
+      <span style="font-size: 14px; color: #333;">過去日付チェックを無効にする</span>
     </label>
   </div>
   {/if}

@@ -128,22 +128,23 @@ const checkRequiredFields = (row, getLabel) => {
 }
 
 // 個別のチェック処理：日付フィールド
-const checkDateFields = (row, getLabel, now) => {
+const checkDateFields = (row, getLabel, now, skipPastDateCheck = false) => {
   const errors = []
   VALIDATION_CONFIG.dateFields.forEach(({ key, pastLimitMonths }) => {
     if (row[key]) {
       const d = new Date(row[key])
       const label = getLabel(key)
-      
-      const pastLimit = new Date(now)
-      pastLimit.setMonth(now.getMonth() - pastLimitMonths)
 
       if (isNaN(d.getTime())) {
         errors.push(`${label}: 日付不正`)
-      } else if (d < pastLimit) {
-        errors.push(`${label}: ${pastLimitMonths}ヶ月以前`)
-      } else if (d > now) {
-        errors.push(`${label}: 未来日付`)
+      } else if (!skipPastDateCheck) {
+        const pastLimit = new Date(now)
+        pastLimit.setMonth(now.getMonth() - pastLimitMonths)
+        if (d < pastLimit) {
+          errors.push(`${label}: ${pastLimitMonths}ヶ月以前`)
+        } else if (d > now) {
+          errors.push(`${label}: 未来日付`)
+        }
       }
     }
   })
@@ -151,9 +152,10 @@ const checkDateFields = (row, getLabel, now) => {
 }
 
 // バリデーション処理
-export const validateData = (data, labelMap = {}) => {
+export const validateData = (data, labelMap = {}, options = {}) => {
   const now = new Date()
-  
+  const { skipPastDateCheck = false } = options
+
   const getLabel = (key) => labelMap[key] || key
 
   // ファイル内でのserial_number重複カウント
@@ -171,7 +173,7 @@ export const validateData = (data, labelMap = {}) => {
 
     // 分割したチェック関数を呼び出す
     errors.push(...checkRequiredFields(row, getLabel))
-    errors.push(...checkDateFields(row, getLabel, now))
+    errors.push(...checkDateFields(row, getLabel, now, skipPastDateCheck))
 
     if (row.serial_number && serialCounts[row.serial_number] > 1) {
       errors.push(`${getLabel("serial_number")}: ファイル内で重複`)
