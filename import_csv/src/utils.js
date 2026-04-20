@@ -111,8 +111,7 @@ const VALIDATION_CONFIG = {
     { key: "application_date", pastLimitMonths: 6 },
     { key: "service_and_billing_start_date", pastLimitMonths: 3 },
     { key: "transfer_application_deadline", pastLimitMonths: 3 }
-  ],
-  transferOffsetMonths: 2
+  ]
 }
 
 // 個別のチェック処理：必須項目
@@ -151,27 +150,6 @@ const checkDateFields = (row, getLabel, now) => {
   return errors
 }
 
-// 個別のチェック処理：譲渡日とサービス開始日の相関
-const checkTransferCorrelation = (row, getLabel) => {
-  const errors = []
-  if (row.transfer_execution_date && row.service_and_billing_start_date) {
-    const transferDate = new Date(row.transfer_execution_date)
-    const serviceDate = new Date(row.service_and_billing_start_date)
-
-    if (!isNaN(transferDate.getTime()) && !isNaN(serviceDate.getTime())) {
-      const minTransferDate = new Date(serviceDate)
-      minTransferDate.setMonth(minTransferDate.getMonth() + VALIDATION_CONFIG.transferOffsetMonths)
-
-      if (transferDate < minTransferDate) {
-        const labelTransfer = getLabel("transfer_execution_date")
-        const labelService = getLabel("service_and_billing_start_date")
-        errors.push(`${labelTransfer}: ${labelService}の${VALIDATION_CONFIG.transferOffsetMonths}ヶ月後以降`)
-      }
-    }
-  }
-  return errors
-}
-
 // バリデーション処理
 export const validateData = (data, labelMap = {}) => {
   const now = new Date()
@@ -194,7 +172,6 @@ export const validateData = (data, labelMap = {}) => {
     // 分割したチェック関数を呼び出す
     errors.push(...checkRequiredFields(row, getLabel))
     errors.push(...checkDateFields(row, getLabel, now))
-    errors.push(...checkTransferCorrelation(row, getLabel))
 
     if (row.serial_number && serialCounts[row.serial_number] > 1) {
       errors.push(`${getLabel("serial_number")}: ファイル内で重複`)
