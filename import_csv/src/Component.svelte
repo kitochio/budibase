@@ -5,6 +5,8 @@
   export let mappingJson = ""
   export let tableId = ""
   export let existingRowsJson = ""
+  export let showPastDateCheckOption = true
+  export let showCsvDatesOption = true
   export let onImport // settingsで定義したイベントはプロパティとして関数が渡されます
 
   const { styleable, API } = getContext("sdk")
@@ -150,11 +152,13 @@
       <input type="checkbox" bind:checked={useShiftJIS} />
       <span style="font-size: 14px; color: #333;">日本語Excel (Shift-JIS) として読み込む</span>
     </label>
+    {#if showPastDateCheckOption}
     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
       <input type="checkbox" bind:checked={skipPastDateCheck} />
       <span style="font-size: 14px; color: #333;">過去日付チェックを無効にする</span>
     </label>
-    {#if existingRow}
+    {/if}
+    {#if showCsvDatesOption && existingRow}
     <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
       <input type="checkbox" bind:checked={useCsvDates} />
       <span style="font-size: 14px; color: #333;">CSVファイルの譲渡申込期日・譲渡実行日を使用する</span>

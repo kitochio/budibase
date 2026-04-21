@@ -29,6 +29,18 @@
         "description": "既存レコードのJSON配列（1件）。transfer_application_deadline と transfer_execution_date をCSV全行に適用します"
       },
       {
+        "type": "boolean",
+        "key": "showPastDateCheckOption",
+        "label": "過去日付チェック無効オプションを表示",
+        "defaultValue": true
+      },
+      {
+        "type": "boolean",
+        "key": "showCsvDatesOption",
+        "label": "CSVの譲渡日付オプションを表示",
+        "defaultValue": true
+      },
+      {
         "type": "event",
         "key": "onImport",
         "label": "On Import",
