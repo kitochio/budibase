@@ -4,6 +4,7 @@
 
   export let mappingJson = ""
   export let tableId = ""
+  export let existingRowsJson = ""
   export let onImport // settingsで定義したイベントはプロパティとして関数が渡されます
 
   const { styleable, API } = getContext("sdk")
@@ -13,10 +14,20 @@
   let jsonResult = ""
   let useShiftJIS = false
   let skipPastDateCheck = false
+  let useCsvDates = false
   let validationWarning = ""
   let isChecking = false
   let previewData = []
   let fileInput
+
+  // 受け取ったJSONの1件目から日付フィールドを取り出す
+  let existingRow = null
+  try {
+    const parsed = existingRowsJson ? JSON.parse(existingRowsJson) : null
+    existingRow = Array.isArray(parsed) && parsed.length > 0 ? parsed[0] : null
+  } catch (e) {
+    console.error("existingRowsJsonのパースに失敗しました", e)
+  }
 
   // ヘッダー変換用マッピング定義
   let headerMapping = {}
@@ -47,7 +58,16 @@
         try {
           isChecking = true
           let data = parseCsv(text, headerMapping)
-          
+
+          // 既存データの日付をCSV全行に適用（チェックボックスOFFかつ既存データあり）
+          if (!useCsvDates && existingRow) {
+            data = data.map(row => ({
+              ...row,
+              ...(existingRow.transfer_application_deadline != null && { transfer_application_deadline: existingRow.transfer_application_deadline }),
+              ...(existingRow.transfer_execution_date != null && { transfer_execution_date: existingRow.transfer_execution_date }),
+            }))
+          }
+
           // 重複チェック実行
           data = await checkDuplicates(data, tableId, API)
 
@@ -134,6 +154,12 @@
       <input type="checkbox" bind:checked={skipPastDateCheck} />
       <span style="font-size: 14px; color: #333;">過去日付チェックを無効にする</span>
     </label>
+    {#if existingRow}
+    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+      <input type="checkbox" bind:checked={useCsvDates} />
+      <span style="font-size: 14px; color: #333;">CSVファイルの譲渡申込期日・譲渡実行日を使用する</span>
+    </label>
+    {/if}
   </div>
   {/if}
 

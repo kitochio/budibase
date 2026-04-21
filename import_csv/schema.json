@@ -23,6 +23,12 @@
         "description": "重複チェックを行う対象のテーブルID (例: ta_...)"
       },
       {
+        "type": "text",
+        "key": "existingRowsJson",
+        "label": "Existing Rows (JSON)",
+        "description": "既存レコードのJSON配列（1件）。transfer_application_deadline と transfer_execution_date をCSV全行に適用します"
+      },
+      {
         "type": "event",
         "key": "onImport",
         "label": "On Import",
