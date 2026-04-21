@@ -110,7 +110,7 @@ const VALIDATION_CONFIG = {
   dateFields: [
     { key: "application_date", pastLimitMonths: 6 },
     { key: "service_and_billing_start_date", pastLimitMonths: 3 },
-    { key: "transfer_application_deadline", pastLimitMonths: 3 }
+    { key: "transfer_application_deadline", pastLimitMonths: 3, allowFuture: true }
   ]
 }
 
@@ -130,7 +130,7 @@ const checkRequiredFields = (row, getLabel) => {
 // 個別のチェック処理：日付フィールド
 const checkDateFields = (row, getLabel, now, skipPastDateCheck = false) => {
   const errors = []
-  VALIDATION_CONFIG.dateFields.forEach(({ key, pastLimitMonths }) => {
+  VALIDATION_CONFIG.dateFields.forEach(({ key, pastLimitMonths, allowFuture }) => {
     if (row[key]) {
       const d = new Date(row[key])
       const label = getLabel(key)
@@ -142,7 +142,7 @@ const checkDateFields = (row, getLabel, now, skipPastDateCheck = false) => {
         pastLimit.setMonth(now.getMonth() - pastLimitMonths)
         if (d < pastLimit) {
           errors.push(`${label}: ${pastLimitMonths}ヶ月以前`)
-        } else if (d > now) {
+        } else if (!allowFuture && d > now) {
           errors.push(`${label}: 未来日付`)
         }
       }
